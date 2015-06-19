@@ -1,5 +1,3 @@
-#!/bin/bash
-
 LOGDIR=${PROCDIR}/Log
 TOUCHDIR=${PROCDIR}/Touch
 LOCKDIR=${PROCDIR}/Lock
@@ -31,6 +29,7 @@ QCDIR=${PROCDIR}/QC
 
 mkdir -p "${LOGDIR}" "${TOUCHDIR}" "${LOCKDIR}" "${QCDIR}"
 
+
 function on_exit {
   local rv=$?
   if [ ${rv} -ne 0 ]
@@ -43,6 +42,12 @@ function on_exit {
   rm -rf "${LOCKDIR}/processing"
   exit $rv
 }
+
+for s in $(echo {1..31})
+do
+  trap "exit $s" $s
+done
+
 trap on_exit EXIT
 
 function run_and_log {
