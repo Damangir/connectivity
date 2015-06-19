@@ -14,7 +14,6 @@ fi
 
 rm -rf "${DIFPDIR}"
 mkdir "${DIFPDIR}"
-
 mkdir "${DIFPDIR}/dti"
 
 run_and_log 1.organize.files cp "${CORRDIR}"/data.nii.gz "${CORRDIR}"/nodif_brain_mask.nii.gz "${ORIGDIR}"/bvals "${ORIGDIR}"/bvecs "${DIFPDIR}/dti"

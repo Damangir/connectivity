@@ -23,8 +23,13 @@ ORIGDIR=${PROCDIR}/0.Original
 CORRDIR=${PROCDIR}/1.Correct
 TFITDIR=${PROCDIR}/2.TensorFit
 DIFPDIR=${PROCDIR}/3.DiffusionParameters
+STRDIR=${PROCDIR}/4.Structural
+TRANDIR=${PROCDIR}/5.Registration
+TRACDIR=${PROCDIR}/6.Tractography
 
-mkdir -p ${LOGDIR} ${TOUCHDIR} ${LOCKDIR}
+QCDIR=${PROCDIR}/QC
+
+mkdir -p "${LOGDIR}" "${TOUCHDIR}" "${LOCKDIR}" "${QCDIR}"
 
 function on_exit {
   local rv=$?
@@ -59,7 +64,7 @@ function run_and_log {
 
 if [ -e "${TOUCHDIR}"/stage.${STAGE}.done ]
 then
-  echo This step has already been done. Remove "${TOUCHDIR}"/stage.${STAGE}.done to force re-run >&2
+  echo Stage ${STAGE} has already been done. Remove "${TOUCHDIR}"/stage.${STAGE}.done to force re-run >&2
   exit 0
 fi
 
