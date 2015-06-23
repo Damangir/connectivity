@@ -1,9 +1,9 @@
 #!/bin/bash -e
 
 # Expected input files
-! [ -f "${DTIDATA:='not set'}" ] && printf "DTIDATA (${DTIDATA}) not found it.\n" >&2 && exit 1
-! [ -f "${BVECS}:='not set'" ] && printf "BVECS (${BVECS}) not found it.\n" >&2 && exit 1
-! [ -f "${BVALS}:='not set'" ] && printf "BVALS (${BVALS}) not found it.\n" >&2 && exit 1
+[ ! -f "${DTIDATA:='not set'}" ] && printf "DTIDATA (${DTIDATA}) not found it.\n" >&2 && exit 1
+[ ! -f "${BVECS}:='not set'" ] && printf "BVECS (${BVECS}) not found it.\n" >&2 && exit 1
+[ ! -f "${BVALS}:='not set'" ] && printf "BVALS (${BVALS}) not found it.\n" >&2 && exit 1
 
 export PROCDIR
 export DTIDATA
