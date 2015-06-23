@@ -19,9 +19,6 @@ check_already_run
 rm -rf "${CORRDIR}"
 mkdir "${CORRDIR}"
 
-cp -r ${PROCDIR}/__Cache_1/* "${CORRDIR}"
-exit 0
-
 run_and_log 1.eddy_correct ${FSLPRE}eddy_correct "${ORIGDIR}/original_data.nii.gz" "${CORRDIR}/data" 0 
 run_and_log 2.roi ${FSLPRE}fslroi "${CORRDIR}/data" "${CORRDIR}/nodif" 0 1
 run_and_log 3.bet ${FSLPRE}bet "${CORRDIR}/nodif" "${CORRDIR}/nodif_brain"  -f 0.3 -g 0 -m
