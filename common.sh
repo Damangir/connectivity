@@ -62,7 +62,7 @@ function on_exit {
     do
       if ! [ -e "${req_f}" ]
       then
-        printf "${req_f} is expected but is not present. I assume the procedure failed." >&2
+        printf "${req_f} is expected but is not present. I assume the procedure failed.\n" >&2
         rv=1
       fi
     done <<<"$REQUIRED_FILES"
