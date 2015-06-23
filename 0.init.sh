@@ -1,28 +1,21 @@
-#!/bin/bash -e
+#!/bin/bash
 
-STAGE=0
+source "$(cd "$(dirname "$0")"&&pwd)/common.sh"
 
-DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-source "${DIR}/common.sh"
+# Expected input files
+depends_on "${DTIDATA:-'\$DTIDATA'}" "${BVECS:-'\$BVECS'}" "${BVALS:-'\$BVALS'}"
 
-if ! [ -f "${DTIDATA}" ]
-then
-echo "${DTIDATA} is not a valid input DTI file" >&2
-exit 1
-fi
+# Expected output files
+set +e
+read -r -d '' REQUIRED_FILES <<- EOM
+	${ORIGDIR}/original_data.nii.gz
+	${ORIGDIR}/bvecs
+	${ORIGDIR}/bvals
+EOM
+set -e
 
-if ! [ -f "${BVECS}" ]
-then
-echo "${BVECS} is not a valid file for bvals" >&2
-exit 1
-fi
-
-if ! [ -f "${BVALS}" ]
-then
-echo "${BVALS} is not a valid file for bvals" >&2
-exit 1
-fi
-
+# Check if we need to run this stage
+check_already_run
 
 
 rm -rf "${ORIGDIR}"

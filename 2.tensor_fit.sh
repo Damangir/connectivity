@@ -1,17 +1,28 @@
-#!/bin/bash -e
+#!/bin/bash
 
-STAGE=2
+source "$(cd "$(dirname "$0")"&&pwd)/common.sh"
 
-DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-source "${DIR}/common.sh"
+# Expected input files
+depends_on "${CORRDIR}/data.nii.gz" "${CORRDIR}/nodif_brain_mask.nii.gz" "${ORIGDIR}/bvecs" "${ORIGDIR}/bvals"
 
-# Depends on corrected dti data
-if ! [ -e "${TOUCHDIR}/stage.1.done" ]
-then
-  echo >&2
-  exit 1
-fi
+# Expected output files
+set +e
+read -r -d '' REQUIRED_FILES <<- EOM
+	${TFITDIR}/df_FA.nii.gz
+	${TFITDIR}/df_L1.nii.gz
+	${TFITDIR}/df_L2.nii.gz
+	${TFITDIR}/df_L3.nii.gz
+	${TFITDIR}/df_MD.nii.gz
+	${TFITDIR}/df_MO.nii.gz
+	${TFITDIR}/df_S0.nii.gz
+	${TFITDIR}/df_V1.nii.gz
+	${TFITDIR}/df_V2.nii.gz
+	${TFITDIR}/df_V3.nii.gz
+EOM
+set -e
 
+# Check if we need to run this stage
+check_already_run
 
 rm -rf "${TFITDIR}"
 mkdir "${TFITDIR}"

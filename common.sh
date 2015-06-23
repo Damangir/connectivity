@@ -1,49 +1,92 @@
+
+PROCDIR=${PROCDIR:-"${1?"You should specify PROCDIR or pass it as first var"}"}
+
+SCRIPT_NAME=$( basename "${0}" )
+SCRIPT_DIR=$( cd "$( dirname "${0}" )" && pwd )
+if [ "$SCRIPT_NAME" = common.sh ]
+then
+  printf "common.sh is a utility to be sourced. You can not run it.\n" >&2
+  return 1
+fi
+
+printf "#%.0s" {1..80};printf "\n"
+
+STAGE=${SCRIPT_NAME%%.*}
+printf "# Stage $STAGE\n"
+if [ -f "${SCRIPT_DIR}/directory_structure.sh" ]
+then
+  printf "# Loading diredtory structure at ${SCRIPT_DIR}/directory_structure.sh\n"
+  source "${SCRIPT_DIR}/directory_structure.sh"
+fi
+
 LOGDIR=${PROCDIR}/Log
 TOUCHDIR=${PROCDIR}/Touch
 LOCKDIR=${PROCDIR}/Lock
-
-if [ -e "${LOCKDIR}/processing" ]
-then
-  echo "{PROCDIR}" is locked by another processor. Each subject can only be processed by one application at the same time. >&2
-  exit 1
-fi
-
-if [ -d "$(dirname ${PROCDIR} 2>/dev/null)" ]
-then
-  mkdir -p ${PROCDIR}
-else
-  echo "Directory (${PROCDIR}) does not exist and can not be created" >&2
-  exit 1
-fi
-
-
-ORIGDIR=${PROCDIR}/0.Original
-CORRDIR=${PROCDIR}/1.Correct
-TFITDIR=${PROCDIR}/2.TensorFit
-DIFPDIR=${PROCDIR}/3.DiffusionParameters
-STRDIR=${PROCDIR}/4.Structural
-TRANDIR=${PROCDIR}/5.Registration
-TRACDIR=${PROCDIR}/6.Tractography
-
 QCDIR=${PROCDIR}/QC
+
+LOCK_FILE="${LOCKDIR}/processing"
+DONE_FILE="${TOUCHDIR}"/stage.${STAGE}.done
+ERROR_FILE="${TOUCHDIR}"/stage.${STAGE}.error
+STARTED_FILE="${TOUCHDIR}"/stage.${STAGE}.started
+
+
+if [ -e "${LOCK_FILE}" ]
+then
+  printf "${PROCDIR} is locked by another processor. Each subject can only be processed by one application at the same time.\n" >&2
+  exit 1
+fi
+
+if [ -d $(dirname ${PROCDIR} 2>/dev/null) ]
+then
+  printf "# ${SCRIPT_NAME}: PROCDIR is ${PROCDIR}\n"
+  if ! [ -e ${PROCDIR} ]
+  then
+    printf "# Creating ${PROCDIR}\n"
+    mkdir ${PROCDIR}
+  fi
+else
+  printf "Directory (${PROCDIR}) does not exist and can not be created\n" >&2
+  exit 1
+fi
 
 mkdir -p "${LOGDIR}" "${TOUCHDIR}" "${LOCKDIR}" "${QCDIR}"
 
 
 function on_exit {
   local rv=$?
+  printf "#%.0s" {1..80};printf "\n"
+  # Process done without error. Now we check if all req. files is there.
+  if [ ${rv} -eq 0 ]
+  then
+    while IFS= read -r req_f
+    do
+      if ! [ -e "${req_f}" ]
+      then
+        printf "${req_f} is expected but is not present. I assume the procedure failed." >&2
+        rv=1
+      fi
+    done <<<"$REQUIRED_FILES"
+  fi
+
   if [ ${rv} -ne 0 ]
   then
-    touch "${TOUCHDIR}/stage.${STAGE}.error"
+    printf "# ${SCRIPT_NAME} failed on ${PROCDIR}. ERRNO: ${rv}\n"
+    touch "${ERROR_FILE}"
+    # Let's make sure there would be no done file from previous runs.
+    rm -rf "${DONE_FILE}"
   else
-    touch "${TOUCHDIR}/stage.${STAGE}.done"
+    touch "${DONE_FILE}"
+    printf "# ${SCRIPT_NAME} succesed on ${PROCDIR}\n"
   fi
-  rm -rf "${TOUCHDIR}/stage.${STAGE}.started"
-  rm -rf "${LOCKDIR}/processing"
+
+  rm -rf "${STARTED_FILE}"
+  rm -rf "${LOCK_FILE}"
+  printf "#%.0s" {1..80}
+  printf "\n\n"
   exit $rv
 }
 
-for s in $(echo {1..31})
+for s in $(printf "%d " {1..31})
 do
   trap "exit $s" $s
 done
@@ -53,34 +96,60 @@ trap on_exit EXIT
 function run_and_log {
   local run_name=$1
   shift
-  echo "# Stage ${STAGE}: ${run_name}"
-  echo $@
+  printf "# Stage ${STAGE}: ${run_name}\n"
+  printf "%s " "$@"
+  printf "\n"
   $@ &>"${LOGDIR}"/log.${STAGE}.${run_name}.txt
   local rv=$?
   if [ "${rv}" -eq 0 ]
   then
-    echo "# Success!"
+    printf "# Success!\n"
     touch "${TOUCHDIR}/touch.${STAGE}.${run_name}.$(date +%Y%m%d.%H%M%S)"
   else
-    echo "# Fail!"
+    printf "# Fail!\n"
     exit 1
   fi
 }
 
-if [ -e "${TOUCHDIR}"/stage.${STAGE}.done ]
-then
-  echo Stage ${STAGE} has already been done. Remove "${TOUCHDIR}"/stage.${STAGE}.done to force re-run >&2
-  exit 0
-fi
+function check_updated {
+  for file in "$@"
+  do
+    if [ "$file" -nt "${DONE_FILE}" ]
+    then
+      printf "$file has been updated since previous run. I will force the stage to re-run.\n" >&2
+      rm -rf "${DONE_FILE}"
+    fi
+  done
+}
+
+function check_already_run {
+  if [ -e "${DONE_FILE}" ]
+  then
+    printf "Stage ${STAGE} has already been done. Remove "${TOUCHDIR}"/stage.${STAGE}.done to force re-run\n" >&2
+    exit 0
+  fi
+}
+
+function depends_on {
+  for file in "$@"
+  do
+    printf "# Dependency check: $file\n"
+    if ! [ -f "$file" ]
+    then
+      printf "$file is required for running ${SCRIPT_NAME}.\n" >&2
+      exit 1
+    fi
+  done
+  if [ -e "${DONE_FILE}" ]
+  then
+    check_updated "$@"
+  fi
+}
 
 rm -rf "${TOUCHDIR}"/stage.${STAGE}.error
 rm -rf "${TOUCHDIR}"/touch.${STAGE}.*
 
-set -- "${TOUCHDIR}"/stage.[*].error "${TOUCHDIR}"/stage.*.error
-case $1$2 in
-  ("${TOUCHDIR}"/stage.'[*]'.error"${TOUCHDIR}"/stage.'*'.error);;
-  (*) echo There are some unresolved errors from previous runs in the directory structure; exit 1;
-esac
-
 touch "${LOCKDIR}/processing"
 touch "${TOUCHDIR}/stage.${STAGE}.started"
+
+printf "#%.0s" {1..80};printf "\n"

@@ -1,18 +1,26 @@
-#!/bin/bash -e
+#!/bin/bash
 
-STAGE=1
+source "$(cd "$(dirname "$0")"&&pwd)/common.sh"
 
-DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-source "${DIR}/common.sh"
+# Expected input files
+depends_on "${ORIGDIR}/original_data.nii.gz" 
 
-if ! [ -e "${TOUCHDIR}/stage.0.done" ]
-then
-  echo >&2
-  exit 1
-fi
+# Expected output files
+set +e
+read -r -d '' REQUIRED_FILES <<- EOM
+	${CORRDIR}/data.nii.gz
+	${CORRDIR}/nodif.nii.gz
+	${CORRDIR}/nodif_brain_mask.nii.gz
+EOM
+set -e
+# Check if we need to run this stage
+check_already_run
 
 rm -rf "${CORRDIR}"
 mkdir "${CORRDIR}"
+
+cp -r ${PROCDIR}/__Cache_1/* "${CORRDIR}"
+exit 0
 
 run_and_log 1.eddy_correct ${FSLPRE}eddy_correct "${ORIGDIR}/original_data.nii.gz" "${CORRDIR}/data" 0 
 run_and_log 2.roi ${FSLPRE}fslroi "${CORRDIR}/data" "${CORRDIR}/nodif" 0 1
