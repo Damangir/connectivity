@@ -1,0 +1,12 @@
+11  lh.caudate
+12  lh.putamen
+13  lh.pallidum
+17  lh.hippocampus
+18  lh.amygdala
+20  lh.operculum
+50  rh.caudate
+51  rh.putamen
+52  rh.pallidum
+53  rh.hippocampus
+54  rh.amygdala
+56  rh.operculum

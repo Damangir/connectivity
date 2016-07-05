@@ -16,9 +16,9 @@ set -e
 
 # Check if we need to run this stage
 check_already_run
+remove_expected_output
 
 
-rm -rf "${ORIGDIR}"
 mkdir "${ORIGDIR}"
 
 run_and_log 1.copy_data cp "${DTIDATA}" "${ORIGDIR}/original_data.nii.gz"

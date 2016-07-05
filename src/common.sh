@@ -3,6 +3,7 @@ PROCDIR=${PROCDIR:-"${1?"You should specify PROCDIR or pass it as first var"}"}
 
 SCRIPT_NAME=$( basename "${0}" )
 SCRIPT_DIR=$( cd "$( dirname "${0}" )" && pwd )
+DATA_DIR=$( cd "$( dirname "${SCRIPT_DIR}" )/data" && pwd )
 if [ "$SCRIPT_NAME" = common.sh ]
 then
   printf "common.sh is a utility to be sourced. You can not run it.\n" >&2
@@ -11,33 +12,12 @@ fi
 
 printf "#%.0s" {1..80};printf "\n"
 
-STAGE=${SCRIPT_NAME%%.*}
+STAGE=${SCRIPT_NAME%.*.*}
 printf "# Stage $STAGE\n"
-if [ -f "${SCRIPT_DIR}/directory_structure.sh" ]
-then
-  printf "# Loading diredtory structure at ${SCRIPT_DIR}/directory_structure.sh\n"
-  source "${SCRIPT_DIR}/directory_structure.sh"
-fi
-
-LOGDIR=${PROCDIR}/Log
-TOUCHDIR=${PROCDIR}/Touch
-LOCKDIR=${PROCDIR}/Lock
-QCDIR=${PROCDIR}/QC
-
-LOCK_FILE="${LOCKDIR}/processing"
-DONE_FILE="${TOUCHDIR}"/stage.${STAGE}.done
-ERROR_FILE="${TOUCHDIR}"/stage.${STAGE}.error
-STARTED_FILE="${TOUCHDIR}"/stage.${STAGE}.started
-
-
-if [ -e "${LOCK_FILE}" ]
-then
-  printf "${PROCDIR} is locked by another processor. Each subject can only be processed by one application at the same time.\n" >&2
-  exit 1
-fi
 
 if [ -d $(dirname ${PROCDIR} 2>/dev/null) ]
 then
+  PROCDIR=$( cd "$( dirname "${PROCDIR}" )" && pwd )/$(basename "${PROCDIR}")
   printf "# ${SCRIPT_NAME}: PROCDIR is ${PROCDIR}\n"
   if ! [ -e ${PROCDIR} ]
   then
@@ -48,6 +28,19 @@ else
   printf "Directory (${PROCDIR}) does not exist and can not be created\n" >&2
   exit 1
 fi
+
+if [ -f "${SCRIPT_DIR}/directory_structure.sh" ]
+then
+  printf "# Loading diredtory structure at ${SCRIPT_DIR}/directory_structure.sh\n"
+  source "${SCRIPT_DIR}/directory_structure.sh"
+fi
+
+if [ -e "${LOCK_FILE}" ]
+then
+  printf "${PROCDIR} is locked by another processor. Each subject can only be processed by one application at the same time.\n" >&2
+  exit 1
+fi
+
 
 mkdir -p "${LOGDIR}" "${TOUCHDIR}" "${LOCKDIR}" "${QCDIR}"
 
@@ -73,7 +66,7 @@ function on_exit {
     printf "# ${SCRIPT_NAME} failed on ${PROCDIR}. ERRNO: ${rv}\n"
     touch "${ERROR_FILE}"
     # Let's make sure there would be no done file from previous runs.
-    rm -rf "${DONE_FILE}"
+    rm -f "${DONE_FILE}"
   else
     touch "${DONE_FILE}"
     printf "# ${SCRIPT_NAME} succesed on ${PROCDIR}\n"
@@ -81,6 +74,7 @@ function on_exit {
 
   rm -rf "${STARTED_FILE}"
   rm -rf "${LOCK_FILE}"
+  rm -rf "${CON_TEMPDIR}"
   printf "#%.0s" {1..80}
   printf "\n\n"
   exit $rv
@@ -92,6 +86,9 @@ do
 done
 
 trap on_exit EXIT
+
+(umask 077 && mkdir "${CON_TEMPDIR}") || exit 1
+
 
 function run_and_log {
   local run_name=$1
@@ -109,6 +106,14 @@ function run_and_log {
     printf "# Fail!\n"
     exit 1
   fi
+}
+
+function remove_expected_output {
+    while IFS= read -r req_f
+    do
+      [ -e "${req_f}" ] && rm -r "${req_f}"
+    done <<<"$REQUIRED_FILES"
+    return 0
 }
 
 function check_updated {

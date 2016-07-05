@@ -15,8 +15,8 @@ EOM
 set -e
 # Check if we need to run this stage
 check_already_run
+remove_expected_output
 
-rm -rf "${CORRDIR}"
 mkdir "${CORRDIR}"
 
 run_and_log 1.eddy_correct ${FSLPRE}eddy_correct "${ORIGDIR}/original_data.nii.gz" "${CORRDIR}/data" 0 

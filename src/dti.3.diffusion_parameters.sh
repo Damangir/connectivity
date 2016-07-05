@@ -31,9 +31,9 @@ set -e
 
 # Check if we need to run this stage
 check_already_run
+remove_expected_output
 
 
-rm -rf "${DIFPDIR}"
 mkdir "${DIFPDIR}"
 mkdir "${DIFPDIR}/dti"
 

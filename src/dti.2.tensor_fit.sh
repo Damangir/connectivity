@@ -23,8 +23,8 @@ set -e
 
 # Check if we need to run this stage
 check_already_run
+remove_expected_output
 
-rm -rf "${TFITDIR}"
 mkdir "${TFITDIR}"
 
 run_and_log dtifit ${FSLPRE}dtifit -k "${CORRDIR}/data" -m "${CORRDIR}/nodif_brain_mask" -r "${ORIGDIR}/bvecs" -b "${ORIGDIR}/bvals" -o "${TFITDIR}/df"
