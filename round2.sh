@@ -5,6 +5,7 @@
 
 SCRIPT_DIR=$( cd "$( dirname "${0}" )" && pwd )/src
 
+export PROCDIR
 export FREESURFER_DIR
 
 ${stage_runner} ${SCRIPT_DIR}/structural.0.import_freesurfer.sh
