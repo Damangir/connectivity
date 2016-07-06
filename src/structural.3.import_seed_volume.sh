@@ -45,7 +45,7 @@ mkdir -p "${STR_SEEDDIR}"
 
 for hemi in lh rh
 do
-	run_and_log 0.${hemi}.extract_labels mri_annotation2label --subject "${FREESURFER_DIR}" --hemi ${hemi} --outdir "${CON_TEMPDIR}/labels" --sd .
+	run_and_log 0.${hemi}.extract_labels mri_annotation2label --subject $(basename "${FREESURFER_DIR}") --hemi ${hemi} --outdir "${CON_TEMPDIR}/labels" --sd $(dirname "${FREESURFER_DIR}")
 
     for lab in $(cat "${LABELS_PARC}")
     do
