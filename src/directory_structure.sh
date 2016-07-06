@@ -20,12 +20,13 @@ CORRDIR=${DTIDIR}/1.Correct
 TFITDIR=${DTIDIR}/2.TensorFit
 DIFPDIR=${DTIDIR}/3.DiffusionParameters
 TRACKDIR=${DTIDIR}/4.Tractography
-
+MNI_TRACKDIR=${TRACKDIR}/MNI
 
 STRDIR=${IMAGEDIR}/structural
 STR_IMPORTDIR=${STRDIR}/0.Original
 STR_REGDIR=${STRDIR}/1.Registration
 STR_SEEDDIR=${STRDIR}/3.TractographySeeds
 
-
 TRACT_SCRDIR=${SRCDIR}/Tractography
+
+MNIDIR=${FSLDIR}/data/standard
