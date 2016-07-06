@@ -53,7 +53,7 @@ function on_exit {
   then
     while IFS= read -r req_f
     do
-      if ! [ -e "${req_f}" ]
+      if [ "${req_f}" ] && ! [ -e "${req_f}" ]
       then
         printf "${req_f} is expected but is not present. I assume the procedure failed.\n" >&2
         rv=1
