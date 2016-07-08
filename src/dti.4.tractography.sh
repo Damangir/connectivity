@@ -38,7 +38,7 @@ mkdir -p "${TRACKDIR}"
 do
 	seed_volume="${STR_SEEDDIR}/${name}.nii.gz"
 	track_volume="${name}.paths.nii.gz"
-	run_and_log 1.${name}.track_paths time probtrackx2 --samples="${DIFPDIR}/dti.bedpostX/merged" \
+	run_and_log 1.${name}.track_paths time ${FSLPRE}probtrackx2 --samples="${DIFPDIR}/dti.bedpostX/merged" \
 	                                              --mask="${CORRDIR}/nodif_brain_mask.nii.gz" \
 	                                              --xfm="${TRANSDIR}/t1_to_dti.mat" \
 	                                              --invxfm="${TRANSDIR}/dti_to_t1.mat" \
