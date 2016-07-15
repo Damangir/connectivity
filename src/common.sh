@@ -64,6 +64,12 @@ function on_exit {
   if [ ${rv} -ne 0 ]
   then
     printf "# ${SCRIPT_NAME} failed on ${PROCDIR}. ERRNO: ${rv}\n"
+    set +e
+    local frame=0
+    while caller $frame; do
+      ((frame++));
+    done
+    set -e
     touch "${ERROR_FILE}"
     # Let's make sure there would be no done file from previous runs.
     rm -f "${DONE_FILE}"
@@ -104,7 +110,7 @@ function run_and_log {
     touch "${TOUCHDIR}/touch.${STAGE}.${run_name}.$(date +%Y%m%d.%H%M%S)"
   else
     printf "# Fail!\n"
-    exit 1
+    exit $rv
   fi
 }
 
