@@ -10,7 +10,7 @@ depends_on "${CORRDIR}/nodif_brain_mask.nii.gz"
 depends_on "${TRANSDIR}/t1_to_dti.mat"
 depends_on "${TRANSDIR}/dti_to_t1.mat"
 
-(cat ${LABELS_SEED}; echo) | while read -r name
+grep . ${LABELS_SEED} | while read -r name
 do
 	seed_volume="${STR_SEEDDIR}/${name}.nii.gz"
 	depends_on "${seed_volume}"
@@ -18,7 +18,7 @@ done
 # Expected output files
 
 set +e
-(cat ${LABELS_SEED}; echo) | while read -r name
+grep . ${LABELS_SEED} | while read -r name
 do
 	track_volume="${TRACKDIR}/${name}.paths.nii.gz"
 	log_file="${TRACKDIR}/${name}.probtrackx.log"
@@ -38,7 +38,7 @@ remove_expected_output
 
 mkdir -p "${TRACKDIR}"
 
-(cat ${LABELS_SEED}; echo) | while read -r name
+grep . ${LABELS_SEED} | while read -r name
 do
 	seed_volume="${STR_SEEDDIR}/${name}.nii.gz"
 	track_volume="${name}.paths.nii.gz"

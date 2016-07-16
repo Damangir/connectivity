@@ -9,7 +9,7 @@ source "$(cd "$(dirname "$0")"&&pwd)/common.sh"
 LABELS_SEED="${DATA_DIR}/labels_seed.txt"
 
 depends_on "${LABELS_SEED}" "${TRANSDIR}/mni_to_t1_coef.nii.gz" "${STR_IMPORTDIR}/flair.normalized.nii.gz" "${TRANSDIR}/t1_to_flair.mat"
-(cat ${LABELS_SEED}; echo) | while read -r name
+grep . ${LABELS_SEED} | while read -r name
 do
 	mni_track_volume="${ATLAS_DIR}/${name}.paths.nii.gz"
 	depends_on "${mni_track_volume}"
@@ -17,7 +17,7 @@ done
 # Expected output files
 
 set +e
-(cat ${LABELS_SEED}; echo) | while read -r name
+grep . ${LABELS_SEED} | while read -r name
 do
 	track_volume="${ATLAS_ON_FLAIR}/${name}.paths.nii.gz"
     read -r -d '' REQUIRED_FILES <<- EOM
@@ -33,16 +33,16 @@ remove_expected_output
 
 mkdir -p "${ATLAS_ON_FLAIR}"
 
-(cat ${LABELS_SEED}; echo) | while read -r name
+grep . ${LABELS_SEED} | while read -r name
 do
 	track_volume="${ATLAS_ON_FLAIR}/${name}.paths.nii.gz"
 	mni_track_volume="${ATLAS_DIR}/${name}.paths.nii.gz"
 	run_and_log 1.${name}.register_paths ${FSLPRE}applywarp --ref="${STR_IMPORTDIR}/flair.normalized.nii.gz" \
                                                             --in="${mni_track_volume}" \
                                                             --out="${track_volume}" \
-                                                            --warp="${TRANSDIR}/mni_to_t1_coef.nii.gz"
+                                                            --warp="${TRANSDIR}/mni_to_t1_coef.nii.gz" \
                                                             --postmat="${TRANSDIR}/t1_to_flair.mat"
 
 
 
-done < "${LABELS_SEED}"
+done

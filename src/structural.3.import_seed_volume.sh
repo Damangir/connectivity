@@ -16,7 +16,7 @@ read -r -d '' REQUIRED_FILES <<- EOM
 EOM
 for hemi in lh rh
 do
-    for lab in $(cat "${LABELS_PARC}")
+    grep . ${LABELS_PARC} | while read -r lab
     do
     	vol="${STR_SEEDDIR}/$hemi.$lab.nii.gz"
 		read -r -d '' REQUIRED_FILES <<- EOM
@@ -26,7 +26,7 @@ EOM
 	done
 done
 
-(cat ${LABELS_ASEG}; echo) | while read -r index name
+grep . ${LABELS_ASEG} | while read -r index name
 do
     vol="${STR_SEEDDIR}/$name.nii.gz"
     read -r -d '' REQUIRED_FILES <<- EOM
@@ -47,7 +47,7 @@ for hemi in lh rh
 do
 	run_and_log 0.${hemi}.extract_labels mri_annotation2label --subject $(basename "${FREESURFER_DIR}") --hemi ${hemi} --outdir "${CON_TEMPDIR}/labels" --sd $(dirname "${FREESURFER_DIR}")
 
-    for lab in $(cat "${LABELS_PARC}")
+    grep . ${LABELS_PARC} | while read -r lab
     do
         label="${CON_TEMPDIR}/labels/$hemi.$lab.label"
         vol="${STR_SEEDDIR}/$hemi.$lab.nii.gz"
@@ -61,7 +61,7 @@ do
     done
 done
 
-(cat ${LABELS_ASEG}; echo) | while read -r index name
+grep . ${LABELS_ASEG} | while read -r index name
 do
     vol="${STR_SEEDDIR}/$name.nii.gz"
     run_and_log 3.${name}.extract_volume ${FSLPRE}fslmaths "${STR_IMPORTDIR}/t1.aseg.nii.gz" -thr ${index} -uthr ${index} "${vol}"
