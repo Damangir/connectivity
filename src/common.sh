@@ -1,5 +1,10 @@
+if ((BASH_VERSINFO[0] < 3))
+then 
+  printf "Sorry, you need at least bash-3.0 to run this script.\n" 
+  exit 1 
+fi
 
-PROCDIR=${PROCDIR:-"${1?"You should specify PROCDIR or pass it as first var"}"}
+PROCDIR=${PROCDIR:-${1?You should specify PROCDIR or pass it as first var}}
 
 SCRIPT_NAME=$( basename "${0}" )
 SCRIPT_DIR=$( cd "$( dirname "${0}" )" && pwd )
@@ -156,6 +161,7 @@ function depends_on {
     check_updated "$@"
   fi
 }
+function join { local d=$1; shift; printf "$1"; shift; printf "%s" "${@/#/$d}"; }
 
 rm -rf "${TOUCHDIR}"/stage.${STAGE}.error
 rm -rf "${TOUCHDIR}"/touch.${STAGE}.*
@@ -163,4 +169,5 @@ rm -rf "${TOUCHDIR}"/touch.${STAGE}.*
 touch "${LOCKDIR}/processing"
 touch "${TOUCHDIR}/stage.${STAGE}.started"
 
-printf "#%.0s" {1..80};printf "\n"
+printf "#%.0s" {1..80};
+printf "\n"
