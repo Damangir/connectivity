@@ -50,7 +50,7 @@ do
 	do
 		mni_track_volume=$(get_path_for_subject "${subj_procdir}" '${MNI_TRACKDIR}'"/${name}.paths.nii.gz")
 		fslmaths_param+=" ${mni_track_volume}"
-	    (( count++ ))
+	    (( count++ ))&&:
 	done < <(grep . ${ATLAS_LIST})
 	fslmaths_param="$(join ' -add ' ${fslmaths_param}) -div ${count} ${atlas_track_volume}"
 	run_and_log 1.averaging.${name} ${FSLPRE}fslmaths $fslmaths_param
