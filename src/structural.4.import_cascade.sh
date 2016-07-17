@@ -3,13 +3,13 @@
 source "$(cd "$(dirname "$0")"&&pwd)/common.sh"
 
 # Expected input files
-depends_on "${CASCADE_DIR}/flair.normalized.nii.gz"
+depends_on "${CASCADE_DIR}/flair.normalized.nii.gz" "${CASCADE_DIR}/flair.modelfree.pval.nii.gz"
 
 # Expected output files
 set +e
 read -r -d '' REQUIRED_FILES <<- EOM
 	${STR_IMPORTDIR}/flair.normalized.nii.gz
-	${TRANSDIR}/flair_to_t1.mat
+	${STR_IMPORTDIR}/flair.pval.nii.gz
 EOM
 set -e
 
