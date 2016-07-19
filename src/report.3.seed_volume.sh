@@ -35,9 +35,9 @@ function measure_volume {
 >${report_name}
 grep . ${LABELS_SEED} | while read -r name
 do
-	track_volume="${ATLAS_ON_FLAIR}/${name}.paths.nii.gz"
+	seed_volume="${STR_SEEDDIR}/${name}.nii.gz"
 	weighted="${CON_TEMPDIR}/weighted.${name}.paths.nii.gz"
-	run_and_log 1.${name}.weight ${FSLPRE}fslmaths "${WHEIGHT_IMG}" -bin "${weighted}"
+	run_and_log 1.${name}.weight ${FSLPRE}fslmaths "${seed_volume}" -bin "${weighted}"
 	run_and_log 2.${name}.report measure_volume
 	printf "%s %s\n" "${name}" "$(cat "${WEIGHTED_VOLUME}")" >> ${report_name}
 done
