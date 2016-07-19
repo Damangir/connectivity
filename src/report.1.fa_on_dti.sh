@@ -28,8 +28,8 @@ mkdir -p "${REPORTDIR}"
 
 WEIGHTED_VOLUME=${CON_TEMPDIR}/weighted_volume.value
 function measure_volume {
-  printf "${FSLPRE}fslstats \"${weighted}\"  -M -V | awk '{ print $1 * $3}'\n"
-  ${FSLPRE}fslstats "${weighted}"  -M -V | awk '{ print $1 * $3}' >${WEIGHTED_VOLUME}
+  printf "${FSLPRE}fslstats \"${weighted}\"  -M -V | awk '{ printf "%f\n", $1 * $3}'\n"
+  ${FSLPRE}fslstats "${weighted}"  -M -V | awk '{ printf "%f\n", $1 * $3}' >${WEIGHTED_VOLUME}
 }
 
 >${REPORTDIR}/wfa.txt
