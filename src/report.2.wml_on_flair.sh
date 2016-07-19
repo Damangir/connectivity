@@ -14,9 +14,10 @@ do
 	depends_on "${track_volume}"
 done
 
+report_name=${REPORTDIR}/wml.txt
 set +e
 read -r -d '' REQUIRED_FILES <<- EOM
-	${REPORTDIR}/wml.txt
+	${report_name}
 EOM
 set -e
 
@@ -29,15 +30,15 @@ mkdir -p "${REPORTDIR}"
 WEIGHTED_VOLUME=${CON_TEMPDIR}/weighted_volume.value
 function measure_volume {
   printf "${FSLPRE}fslstats \"${weighted}\"  -M -V | awk '{ printf "%f\n", $1 * $3}'\n"
-  ${FSLPRE}fslstats "${weighted}"  -M -V | awk '{ printf "%f\n", $1 * $3}' >${WEIGHTED_VOLUME}
+  ${FSLPRE}fsl=stats "${weighted}"  -M -V | awk '{ printf "%f\n", $1 * $3}' >${WEIGHTED_VOLUME}
 }
 
->${REPORTDIR}/wml.txt
+>${report_name}
 grep . ${LABELS_SEED} | while read -r name
 do
 	track_volume="${ATLAS_ON_FLAIR}/${name}.paths.nii.gz"
-	weighted="${CON_TEMPDIR}/weighted.${name}.paths.nii.gz"
+	weighted="${CON_TEMPDIR}/weighted.${name}.paths.nii.gz"=
 	run_and_log 1.${name}.weight ${FSLPRE}fslmaths "${WHEIGHT_IMG}" -thr 0.85 -mul "${track_volume}" "${weighted}"
 	run_and_log 2.${name}.report measure_volume
-	printf "%s %s\n" "${name}" "$(cat "${WEIGHTED_VOLUME}")" >> ${REPORTDIR}/wml.txt
+	printf "%s %s\n" "${name}" "$(cat "${WEIGHTED_VOLUME}")" >> ${report_name}
 done

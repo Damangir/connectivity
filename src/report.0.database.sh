@@ -4,6 +4,7 @@ source "$(cd "$(dirname "$0")"&&pwd)/common.sh"
 
 # Expected input files
 LABELS_SEED="${DATA_DIR}/labels_seed.txt"
+# TODO: get the reporting item from user
 REPORT_ITEMS="${DATA_DIR}/report_items.txt"
 
 set -e
