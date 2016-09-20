@@ -4,7 +4,7 @@ source "$(cd "$(dirname "$0")"&&pwd)/common.sh"
 
 # Expected input files
 LABELS_SEED="${DATA_DIR}/labels_seed.txt"
-WHEIGHT_IMG="${STR_IMPORTDIR}/flair.pval.nii.gz"
+WHEIGHT_IMG="${STR_IMPORTDIR}/flair.wml_mask.nii.gz"
 
 depends_on "${LABELS_SEED}" "${WHEIGHT_IMG}"
 
@@ -30,15 +30,20 @@ mkdir -p "${REPORTDIR}"
 WEIGHTED_VOLUME=${CON_TEMPDIR}/weighted_volume.value
 function measure_volume {
   printf "${FSLPRE}fslstats \"${weighted}\"  -M -V | awk '{ printf "%f\n", $1 * $3}'\n"
-  ${FSLPRE}fsl=stats "${weighted}"  -M -V | awk '{ printf "%f\n", $1 * $3}' >${WEIGHTED_VOLUME}
+  ${FSLPRE}fslstats "${weighted}"  -M -V | awk '{ printf "%f\n", $1 * $3}' >${WEIGHTED_VOLUME}
 }
 
 >${report_name}
 grep . ${LABELS_SEED} | while read -r name
 do
 	track_volume="${ATLAS_ON_FLAIR}/${name}.paths.nii.gz"
-	weighted="${CON_TEMPDIR}/weighted.${name}.paths.nii.gz"=
-	run_and_log 1.${name}.weight ${FSLPRE}fslmaths "${WHEIGHT_IMG}" -thr 0.85 -mul "${track_volume}" "${weighted}"
+	weighted="${CON_TEMPDIR}/weighted.${name}.paths.nii.gz"
+	run_and_log 0.${name}.weight ${FSLPRE}fslmaths "${track_volume}" "${weighted}"
+	run_and_log 0.${name}.report measure_volume
+	max_weight=$(cat "${WEIGHTED_VOLUME}")
+	run_and_log 1.${name}.weight ${FSLPRE}fslmaths "${WHEIGHT_IMG}" -mul "${track_volume}" "${weighted}"
 	run_and_log 2.${name}.report measure_volume
-	printf "%s %s\n" "${name}" "$(cat "${WEIGHTED_VOLUME}")" >> ${report_name}
+	this_weight=$(cat "${WEIGHTED_VOLUME}")
+	relative_weight=$(printf "$this_weight $max_weight" | awk '{printf "%f\n", $1 / $2}' )
+	printf "%s %s\n" "${name}" "$relative_weight" >> ${report_name}
 done
