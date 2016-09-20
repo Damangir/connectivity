@@ -38,7 +38,12 @@ grep . ${LABELS_SEED} | while read -r name
 do
 	track_volume="${ATLAS_ON_DTI}/${name}.paths.nii.gz"
 	weighted="${CON_TEMPDIR}/weighted.${name}.paths.nii.gz"
-	run_and_log 1.${name}.weight ${FSLPRE}fslmaths "${track_volume}" -mul "${WHEIGHT_IMG}"  "${weighted}"
+	run_and_log 0.${name}.weight ${FSLPRE}fslmaths "${track_volume}" "${weighted}"
+	run_and_log 0.${name}.report measure_volume
+	max_weight=$(cat "${WEIGHTED_VOLUME}")
+	run_and_log 1.${name}.weight ${FSLPRE}fslmaths "${WHEIGHT_IMG}" -mul "${track_volume}" "${weighted}"
 	run_and_log 2.${name}.report measure_volume
-	printf "%s %s\n" "${name}" "$(cat "${WEIGHTED_VOLUME}")" >> ${report_name}
+	this_weight=$(cat "${WEIGHTED_VOLUME}")
+	relative_weight=$(printf "$this_weight $max_weight" | awk '{printf "%f\n", $1 / $2}' )
+	printf "%s %s\n" "${name}" "$relative_weight" >> ${report_name}
 done
