@@ -80,6 +80,7 @@ function on_exit {
     rm -f "${DONE_FILE}"
   else
     touch "${DONE_FILE}"
+    rm -f "${ERROR_FILE}"
     printf "# ${SCRIPT_NAME} succesed on ${PROCDIR}\n"
   fi
 
