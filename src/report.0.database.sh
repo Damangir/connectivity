@@ -3,12 +3,9 @@
 source "$(cd "$(dirname "$0")"&&pwd)/common.sh"
 
 # Expected input files
-LABELS_SEED="${DATA_DIR}/labels_seed.txt"
-# TODO: get the reporting item from user
 REPORT_ITEMS="${REPORT_ITEMS:-${DATA_DIR}/report_items.txt}"
 
 set -e
-depends_on "${LABELS_SEED}"
 depends_on "${REPORT_LIST}"
 depends_on "${REPORT_ITEMS}"
 function get_path_for_subject {
@@ -29,17 +26,14 @@ do
 done
 # Expected output files
 set +e
-grep . ${LABELS_SEED} | while read -r name
+grep . ${REPORT_ITEMS} | while read -r to_report
 do
-	grep . ${REPORT_ITEMS} | while read -r to_report
-	do
-		to_report=( $to_report );
-		csv_file=${PROCDIR}/${to_report[2]}.csv
-    	read -r -d '' REQUIRED_FILES <<- EOM
+	to_report=( $to_report );
+	csv_file=${PROCDIR}/${to_report[2]}.csv
+	read -r -d '' REQUIRED_FILES <<- EOM
 ${REQUIRED_FILES}
 ${csv_file}
 EOM
-    done
 done
 set -e
 
@@ -71,14 +65,17 @@ function ensure_consistency {
 	done
 }
 
+run_and_log 0.consistency_check ensure_consistency
+
+
+
+
 function extract_values {
 	report_file=$(get_path_for_subject "${1}" '${REPORTDIR}'"/${report_source}.txt")
 	current_values=$(cut -d ' ' -f ${field} "${report_file}" | tr '\n' ';')
 	current_id=$(basename "${1}")
     printf "${current_id};${current_values}\n" >> "${csv_file}"
 }
-
-run_and_log 0.consistency_check ensure_consistency
 
 grep . ${REPORT_ITEMS} | while read -r to_report
 do
