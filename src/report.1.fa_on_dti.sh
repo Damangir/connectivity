@@ -44,6 +44,5 @@ do
 	run_and_log 1.${name}.weight ${FSLPRE}fslmaths "${WHEIGHT_IMG}" -mul "${track_volume}" "${weighted}"
 	run_and_log 2.${name}.report measure_volume
 	this_weight=$(cat "${WEIGHTED_VOLUME}")
-	relative_weight=$(printf "$this_weight $max_weight" | awk '{printf "%f\n", $2 + 0 == 0 ? 0 : $1 / $2}' )
-	printf "%s %s\n" "${name}" "$relative_weight" >> ${report_name}
+	printf "%s %s %s\n" "${name}" "$max_weight" "$this_weight" >> ${report_name}
 done

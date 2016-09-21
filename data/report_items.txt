@@ -1,2 +1,7 @@
-wfa
-wml
+sdv 2 seed.vol
+wfa 2 wfa.max.weight
+wfa 3 wfa.weight
+wml.tract 2 wml.max.weight
+wml.tract 3 wml.mask.weight
+wml.tract 4 wml.pval.weight
+wml.vol 1 wml.vol
