@@ -53,9 +53,10 @@ do
 	printf "%s %s %s %s\n" "${name}" "$max_weight" "$mask_weight" "$pval_weight" >> ${report_tracts}
 done
 
-run_and_log 3.${name}.weight cp "${WHEIGHT_IMG}" "${weighted}"
-run_and_log 3.${name}.report measure_volume
+weighted="${CON_TEMPDIR}/weighted.nii.gz"
+run_and_log 3.weight cp "${WHEIGHT_IMG}" "${weighted}"
+run_and_log 3.report measure_volume
 cat "${WEIGHTED_VOLUME}" > ${report_vols}
-run_and_log 3.${name}.weight ${FSLPRE}fslmaths "${PVAL_IMG}" -thr 0.85 "${weighted}"
-run_and_log 3.${name}.report measure_volume
+run_and_log 4.weight ${FSLPRE}fslmaths "${PVAL_IMG}" -thr 0.85 "${weighted}"
+run_and_log 4.report measure_volume
 cat "${WEIGHTED_VOLUME}" >> ${report_vols}
