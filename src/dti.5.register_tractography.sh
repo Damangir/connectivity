@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source "$(cd "$(dirname "$0")"&&pwd)/common.sh"
+source "$(cd "$(dirname "$0")/../SSP"&&pwd)/ssp.sh"
 
 # Expected input files
 LABELS_SEED="${DATA_DIR}/labels_seed.txt"
@@ -14,22 +14,15 @@ do
 done
 # Expected output files
 
-set +e
 grep . ${LABELS_SEED} | while read -r name
 do
 	mni_track_volume="${MNI_TRACKDIR}/${name}.paths.nii.gz"
-    read -r -d '' REQUIRED_FILES <<- EOM
-${REQUIRED_FILES}
-${mni_track_volume}
-EOM
+    expects ${mni_track_volume}
 done
-set -e
 
 # Check if we need to run this stage
 check_already_run
 remove_expected_output
-
-mkdir -p "${MNI_TRACKDIR}"
 
 grep . ${LABELS_SEED} | while read -r name
 do

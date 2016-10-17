@@ -1,39 +1,31 @@
-LOGDIR=${PROCDIR}/Log
-TOUCHDIR=${PROCDIR}/Touch
-LOCKDIR=${PROCDIR}/Lock
-QCDIR=${PROCDIR}/QC
-REPORTDIR=${PROCDIR}/Report
+declare -r DATA_DIR=$(cd "${SCRIPT_DIR}/../data"&&pwd)
 
-CON_TEMPDIR=${PROCDIR}/Temp.$$
-
-LOCK_FILE="${LOCKDIR}/processing"
-DONE_FILE="${TOUCHDIR}"/stage.${STAGE}.done
-ERROR_FILE="${TOUCHDIR}"/stage.${STAGE}.error
-STARTED_FILE="${TOUCHDIR}"/stage.${STAGE}.started
-
-TRANSDIR=${PROCDIR}/Transformations
-IMAGEDIR=${PROCDIR}/Images
-SRCDIR=${PROCDIR}/Scripts
-
-DTIDIR=${IMAGEDIR}/DTI
-
-ORIGDIR=${DTIDIR}/0.Original
-CORRDIR=${DTIDIR}/1.Correct
-TFITDIR=${DTIDIR}/2.TensorFit
-DIFPDIR=${DTIDIR}/3.DiffusionParameters
-TRACKDIR=${DTIDIR}/4.Tractography
-MNI_TRACKDIR=${TRACKDIR}/MNI
-ATLAS_TRACKDIR=${DTIDIR}/5.TractographyFronAtlas
-ATLAS_ON_FLAIR=${ATLAS_TRACKDIR}/flair
-ATLAS_ON_DTI=${ATLAS_TRACKDIR}/DTI
-ATLAS_ON_T1=${ATLAS_TRACKDIR}/t1
+declare -r QCDIR=${PROCDIR}/QC
+declare -r REPORTDIR=${PROCDIR}/Report
+declare -r TRANSDIR=${PROCDIR}/Transformations
+declare -r IMAGEDIR=${PROCDIR}/Images
+declare -r DTIDIR=${IMAGEDIR}/DTI
+declare -r ORIGDIR=${DTIDIR}/0.Original
+declare -r CORRDIR=${DTIDIR}/1.Correct
+declare -r TFITDIR=${DTIDIR}/2.TensorFit
+declare -r DIFPDIR=${DTIDIR}/3.DiffusionParameters
+declare -r TRACKDIR=${DTIDIR}/4.Tractography
+declare -r MNI_TRACKDIR=${TRACKDIR}/MNI
+declare -r ATLAS_TRACKDIR=${DTIDIR}/5.TractographyFronAtlas
+declare -r ATLAS_ON_FLAIR=${ATLAS_TRACKDIR}/flair
+declare -r ATLAS_ON_DTI=${ATLAS_TRACKDIR}/DTI
+declare -r ATLAS_ON_T1=${ATLAS_TRACKDIR}/t1
+declare -r STRDIR=${IMAGEDIR}/structural
+declare -r STR_IMPORTDIR=${STRDIR}/0.Original
+declare -r STR_REGDIR=${STRDIR}/1.Registration
+declare -r STR_SEEDDIR=${STRDIR}/3.TractographySeeds
 
 
-STRDIR=${IMAGEDIR}/structural
-STR_IMPORTDIR=${STRDIR}/0.Original
-STR_REGDIR=${STRDIR}/1.Registration
-STR_SEEDDIR=${STRDIR}/3.TractographySeeds
+mkdir -p "$QCDIR" "$REPORTDIR" "$TRANSDIR" "$IMAGEDIR"
+mkdir -p "$DTIDIR" "$ORIGDIR" "$CORRDIR" "$TFITDIR" "$DIFPDIR" "$TRACKDIR"
+mkdir -p "$MNI_TRACKDIR" "$ATLAS_TRACKDIR" "$ATLAS_ON_T1" "$ATLAS_ON_DTI" "$ATLAS_ON_FLAIR"
+mkdir -p "$STRDIR" "$STR_IMPORTDIR" "$STR_SEEDDIR" "$STR_REGDIR"
 
-TRACT_SCRDIR=${SRCDIR}/Tractography
+mkdir -p "${DIFPDIR}/dti"
 
-MNIDIR=${FSLDIR}/data/standard
+declare -r MNIDIR=${FSLDIR}/data/standard

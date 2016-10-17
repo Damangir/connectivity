@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source "$(cd "$(dirname "$0")"&&pwd)/common.sh"
+source "$(cd "$(dirname "$0")/../SSP"&&pwd)/ssp.sh"
 
 # Expected input files
 LABELS_SEED="${DATA_DIR}/labels_seed.txt"
@@ -17,26 +17,17 @@ do
 done
 # Expected output files
 
-set +e
 grep . ${LABELS_SEED} | while read -r name
 do
 	track_volume="${TRACKDIR}/${name}.paths.nii.gz"
 	log_file="${TRACKDIR}/${name}.probtrackx.log"
 	way_total="${TRACKDIR}/${name}.waytotal"
-    read -r -d '' REQUIRED_FILES <<- EOM
-${REQUIRED_FILES}
-${track_volume}
-${log_file}
-${way_total}
-EOM
+	expects ${track_volume} ${log_file} ${way_total}
 done
-set -e
 
 # Check if we need to run this stage
 check_already_run
 remove_expected_output
-
-mkdir -p "${TRACKDIR}"
 
 grep . ${LABELS_SEED} | while read -r name
 do
@@ -57,5 +48,4 @@ do
 
 	run_and_log 2.${name}.rename_log mv "${TRACKDIR}/probtrackx.log" "${TRACKDIR}/${name}.probtrackx.log"
 	run_and_log 2.${name}.rename_way mv "${TRACKDIR}/waytotal" "${TRACKDIR}/${name}.waytotal"
-
 done

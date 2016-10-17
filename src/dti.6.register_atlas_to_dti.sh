@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source "$(cd "$(dirname "$0")"&&pwd)/common.sh"
+source "$(cd "$(dirname "$0")/../SSP"&&pwd)/ssp.sh"
 
 # ATLAS_DIR is the directory where the atlas of track reside.
 # ATLAS_DIR should be exported before
@@ -16,22 +16,15 @@ do
 done
 # Expected output files
 
-set +e
 grep . ${LABELS_SEED} | while read -r name
 do
 	track_volume="${ATLAS_ON_DTI}/${name}.paths.nii.gz"
-    read -r -d '' REQUIRED_FILES <<- EOM
-${REQUIRED_FILES}
-${track_volume}
-EOM
+    expects ${track_volume}
 done
-set -e
 
 # Check if we need to run this stage
 check_already_run
 remove_expected_output
-
-mkdir -p "${ATLAS_ON_DTI}"
 
 grep . ${LABELS_SEED} | while read -r name
 do
@@ -42,6 +35,5 @@ do
                                                             --out="${track_volume}" \
                                                             --warp="${TRANSDIR}/mni_to_t1_coef.nii.gz" \
                                                             --postmat="${TRANSDIR}/t1_to_dti.mat"
-
 
 done

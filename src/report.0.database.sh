@@ -1,20 +1,20 @@
 #!/bin/bash
 
-source "$(cd "$(dirname "$0")"&&pwd)/common.sh"
+source "$(cd "$(dirname "$0")/../SSP"&&pwd)/ssp.sh"
 
 # Expected input files
 REPORT_ITEMS="${REPORT_ITEMS:-${DATA_DIR}/report_items.txt}"
 
-set -e
 depends_on "${REPORT_LIST}"
 depends_on "${REPORT_ITEMS}"
+
 function get_path_for_subject {
-	(
-		PROCDIR=$1
-		source "${SCRIPT_DIR}/directory_structure.sh"
-		eval echo "$2"
-	)
+	env -i PROCDIR=$1 EXPAND=$2 SCRIPT_DIR=$SCRIPT_DIR \
+	   bash -xc 'source "$SCRIPT_DIR/directory_structure.sh";eval echo "$EXPAND"' 
 }
+# We don't want this function to show up in the reproduce script
+declare -F | sort -u > "${CON_TEMPDIR}/old.functions.txt"
+
 grep . ${REPORT_LIST} | while read -r subj_procdir
 do
 	grep . ${REPORT_ITEMS} | while read -r to_report
@@ -25,17 +25,12 @@ do
 	done
 done
 # Expected output files
-set +e
 grep . ${REPORT_ITEMS} | while read -r to_report
 do
 	to_report=( $to_report );
 	csv_file=${PROCDIR}/${to_report[2]}.csv
-	read -r -d '' REQUIRED_FILES <<- EOM
-${REQUIRED_FILES}
-${csv_file}
-EOM
+	expects ${csv_file}
 done
-set -e
 
 # Check if we need to run this stage
 check_already_run
@@ -47,8 +42,8 @@ function ensure_consistency {
 	grep . ${REPORT_ITEMS} | while read -r to_report
 	do
 		to_report=( $to_report );
-		report_file=$(get_path_for_subject "${a_procdir}" '${REPORTDIR}'"/${to_report[0]}.txt")
-		prev=$(cut -d ' ' -f 1 "${report_file}" | tr '\n' ';')
+		local report_file=$(get_path_for_subject "${a_procdir}" '${REPORTDIR}'"/${to_report[0]}.txt")
+		local prev=$(cut -d ' ' -f 1 "${report_file}" | tr '\n' ';')
 		while read -r subj_procdir
 		do
 			report_file=$(get_path_for_subject "${subj_procdir}" '${REPORTDIR}'"/${to_report[0]}.txt")
@@ -67,13 +62,10 @@ function ensure_consistency {
 
 run_and_log 0.consistency_check ensure_consistency
 
-
-
-
 function extract_values {
-	report_file=$(get_path_for_subject "${1}" '${REPORTDIR}'"/${report_source}.txt")
-	current_values=$(cut -d ' ' -f ${field} "${report_file}" | tr '\n' ';')
-	current_id=$(basename "${1}")
+	local report_file=$(get_path_for_subject "${1}" '${REPORTDIR}'"/${report_source}.txt")
+	local current_values=$(cut -d ' ' -f ${field} "${report_file}" | tr '\n' ';')
+	local current_id=$(basename "${1}")
     printf "${current_id};${current_values}\n" >> "${csv_file}"
 }
 

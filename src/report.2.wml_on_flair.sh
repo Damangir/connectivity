@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source "$(cd "$(dirname "$0")"&&pwd)/common.sh"
+source "$(cd "$(dirname "$0")/../SSP"&&pwd)/ssp.sh"
 
 # Expected input files
 LABELS_SEED="${DATA_DIR}/labels_seed.txt"
@@ -17,22 +17,16 @@ done
 
 report_tracts=${REPORTDIR}/wml.tract.txt
 report_vols=${REPORTDIR}/wml.vol.txt
-set +e
-read -r -d '' REQUIRED_FILES <<- EOM
-	${report_tracts}
-	${report_vols}
-EOM
-set -e
+
+expects ${report_tracts} ${report_vols}
 
 # Check if we need to run this stage
 check_already_run
 remove_expected_output
 
-mkdir -p "${REPORTDIR}"
 
 WEIGHTED_VOLUME=${CON_TEMPDIR}/weighted_volume.value
 function measure_volume {
-  printf "${FSLPRE}fslstats \"${weighted}\"  -M -V | awk '{ printf "%f\n", $1 * $3}'\n"
   ${FSLPRE}fslstats "${weighted}"  -M -V | awk '{ printf "%f\n", $1 * $3}' >${WEIGHTED_VOLUME}
 }
 

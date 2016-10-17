@@ -1,23 +1,16 @@
 #!/bin/bash
 
-source "$(cd "$(dirname "$0")"&&pwd)/common.sh"
+source "$(cd "$(dirname "$0")/../SSP"&&pwd)/ssp.sh"
 
 # Expected input files
 depends_on "${ORIGDIR}/original_data.nii.gz" 
 
 # Expected output files
-set +e
-read -r -d '' REQUIRED_FILES <<- EOM
-	${CORRDIR}/data.nii.gz
-	${CORRDIR}/nodif.nii.gz
-	${CORRDIR}/nodif_brain_mask.nii.gz
-EOM
-set -e
+expects ${CORRDIR}/data.nii.gz ${CORRDIR}/nodif.nii.gz ${CORRDIR}/nodif_brain_mask.nii.gz
+
 # Check if we need to run this stage
 check_already_run
 remove_expected_output
-
-mkdir "${CORRDIR}"
 
 run_and_log 1.eddy_correct ${FSLPRE}eddy_correct "${ORIGDIR}/original_data.nii.gz" "${CORRDIR}/data" 0 
 run_and_log 2.roi ${FSLPRE}fslroi "${CORRDIR}/data" "${CORRDIR}/nodif" 0 1

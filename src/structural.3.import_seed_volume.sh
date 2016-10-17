@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source "$(cd "$(dirname "$0")"&&pwd)/common.sh"
+source "$(cd "$(dirname "$0")/../SSP"&&pwd)/ssp.sh"
 
 # Expected input files
 FREESURFER_DIR="${FREESURFER_DIR:-'\$FREESURFER_DIR'}"
@@ -11,37 +11,24 @@ depends_on "${LABELS_ASEG}" "${LABELS_PARC}"
 depends_on "${FREESURFER_DIR}/mri/rawavg.mgz" "${FREESURFER_DIR}/mri/aseg.mgz" "${STR_IMPORTDIR}/t1.aseg.nii.gz"
 
 # Expected output files
-set +e
-read -r -d '' REQUIRED_FILES <<- EOM
-EOM
 for hemi in lh rh
 do
     grep . ${LABELS_PARC} | while read -r lab
     do
     	vol="${STR_SEEDDIR}/$hemi.$lab.nii.gz"
-		read -r -d '' REQUIRED_FILES <<- EOM
-${REQUIRED_FILES}
-${vol}
-EOM
+        expects ${vol}
 	done
 done
 
 grep . ${LABELS_ASEG} | while read -r index name
 do
     vol="${STR_SEEDDIR}/$name.nii.gz"
-    read -r -d '' REQUIRED_FILES <<- EOM
-${REQUIRED_FILES}
-${vol}
-EOM
+    expects ${vol}
 done
-set -e
 
 # Check if we need to run this stage
 check_already_run
 remove_expected_output
-
-mkdir -p "${STR_IMPORTDIR}"
-mkdir -p "${STR_SEEDDIR}"
 
 for hemi in lh rh
 do

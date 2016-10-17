@@ -1,26 +1,17 @@
 #!/bin/bash
 
-source "$(cd "$(dirname "$0")"&&pwd)/common.sh"
+source "$(cd "$(dirname "$0")/../SSP"&&pwd)/ssp.sh"
 
 # Expected input files
 FREESURFER_DIR="${FREESURFER_DIR:-'\$FREESURFER_DIR'}"
 depends_on "${FREESURFER_DIR}/mri/rawavg.mgz" "${FREESURFER_DIR}/mri/aseg.mgz"
 
 # Expected output files
-set +e
-read -r -d '' REQUIRED_FILES <<- EOM
-	${STR_IMPORTDIR}/t1.nii.gz
-	${STR_IMPORTDIR}/t1.brain.nii.gz
-	${STR_IMPORTDIR}/t1.aseg.nii.gz
-EOM
-set -e
+expect ${STR_IMPORTDIR}/t1.nii.gz ${STR_IMPORTDIR}/t1.brain.nii.gz ${STR_IMPORTDIR}/t1.aseg.nii.gz
 
 # Check if we need to run this stage
 check_already_run
 remove_expected_output
-
-mkdir -p "${STR_IMPORTDIR}"
-
 
 run_and_log 1.import_original_t1 mri_convert "${FREESURFER_DIR}/mri/rawavg.mgz" "${STR_IMPORTDIR}/t1.nii.gz"
 run_and_log 2.import_aseg mri_label2vol --seg "${FREESURFER_DIR}/mri/aseg.mgz" --temp "${FREESURFER_DIR}/mri/rawavg.mgz" --o "${STR_IMPORTDIR}/t1.aseg.nii.gz" --regheader "${FREESURFER_DIR}/mri/aseg.mgz"

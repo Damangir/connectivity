@@ -1,21 +1,20 @@
 #!/bin/bash
 
-source "$(cd "$(dirname "$0")"&&pwd)/common.sh"
+source "$(cd "$(dirname "$0")/../SSP"&&pwd)/ssp.sh"
 
 # Expected input files
 LABELS_SEED="${DATA_DIR}/labels_seed.txt"
 
-set -e
 depends_on "${LABELS_SEED}"
 depends_on "${ATLAS_LIST}"
 
 function get_path_for_subject {
-	(
-		PROCDIR=$1
-		source "${SCRIPT_DIR}/directory_structure.sh"
-		eval echo "$2"
-	)
+	env -i PROCDIR=$1 EXPAND=$2 SCRIPT_DIR=$SCRIPT_DIR \
+	   bash -xc 'source "$SCRIPT_DIR/directory_structure.sh";eval echo "$EXPAND"' 
 }
+# We don't want this function to show up in the reproduce script
+declare -F | sort -u > "${CON_TEMPDIR}/old.functions.txt"
+
 grep . ${LABELS_SEED} | while read -r name
 do
 	grep . ${ATLAS_LIST} | while read -r subj_procdir
@@ -26,16 +25,11 @@ do
 done
 # Expected output files
 
-set +e
 grep . ${LABELS_SEED} | while read -r name
 do
 	atlas_track_volume="${PROCDIR}/${name}.paths.nii.gz"
-  read -r -d '' REQUIRED_FILES <<- EOM
-${REQUIRED_FILES}
-${atlas_track_volume}
-EOM
+	expects ${atlas_track_volume}
 done
-set -e
 
 # Check if we need to run this stage
 check_already_run
